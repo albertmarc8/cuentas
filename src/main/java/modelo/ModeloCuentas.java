@@ -9,17 +9,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class ModeloCuentas extends AbstractTableModel implements Modelo {
-
-    private String[] nombres =  {"Nombre", "Pagado", "Saldo"};
+public class ModeloCuentas implements Modelo {
 
     private Vista vista;
-    List<Persona> personas;
-    private BigDecimal total;
-    private BigDecimal cuota;
+
+    private NuestroTableModel tableModel;
 
     public ModeloCuentas() {
-        personas = new ArrayList<>();
+       tableModel = new NuestroTableModel();
     }
 
     @Override
@@ -29,13 +26,14 @@ public class ModeloCuentas extends AbstractTableModel implements Modelo {
 
     @Override
     public BigDecimal getTotal() {
-        return total;
+        return tableModel.getTotal();
     }
 
     @Override
     public BigDecimal getCuota() {
-        return cuota;
+        return tableModel.getCuota();
     }
+
 
     @Override
     public void insertarPago(String nombre, String concepto, BigDecimal cantidad) {
@@ -48,87 +46,46 @@ public class ModeloCuentas extends AbstractTableModel implements Modelo {
 
         Persona persona;
         int posicion = -1;
-        for (int i = 0; i < personas.size(); i++)
-            if (personas.get(i).getNombre().equals(nombre)) {
+        for (int i = 0; i < tableModel.personas.size(); i++)
+            if (tableModel.personas.get(i).getNombre().equals(nombre)) {
                 posicion = i;
                 break;
             }
         if (posicion != -1)
-            persona = personas.get(posicion);
+            persona = tableModel.personas.get(posicion);
         else {
             persona = new Persona(nombre);
-            personas.add(persona);
+            tableModel.personas.add(persona);
         }
         persona.insertarPago(concepto, cantidad);
-        actualizaReparto();
+        tableModel.actualizaReparto();
         realizarPagos();
         vista.datosCambiados();
     }
 
-    private void actualizaReparto() {
-        total = new BigDecimal(0);
-        for (Persona persona: personas)
-            total = total.add(persona.getPagado());
-        if (!personas.isEmpty())
-            cuota = total.divide(BigDecimal.valueOf(personas.size()), BigDecimal.ROUND_DOWN);
-        else
-            cuota = new BigDecimal(0);
-    }
+
 
     @Override
     public AbstractTableModel getModelo() {
-        return this;
-    }
-
-    @Override
-    public int getRowCount() {
-        return personas.size();
-    }
-
-    @Override
-    public int getColumnCount() {
-        return 3;
-    }
-
-    @Override
-    public Object getValueAt(int row, int column) {
-        Persona persona = personas.get(row);
-        switch (column) {
-            case 0:
-                return persona.getNombre();
-            case 1:
-                return persona.getPagado();
-            case 2:
-                return (cuota.subtract(persona.getPagado()));
-            default:
-                return null;
-        }
-    }
-
-    @Override
-    public String getColumnName(int column) {
-        return nombres[column];
-    }
-
-    @Override
-    public Class<?> getColumnClass(int columnIndex) {
-        return getValueAt(0, columnIndex).getClass();
+        return tableModel;
     }
 
     public void realizarPagos() {
         List<BigDecimal> saldos = new ArrayList<>();
 
-        for (Persona persona : personas) {
-            BigDecimal result = cuota.subtract(persona.getPagado());
+        for (Persona persona : tableModel.personas) {
+            BigDecimal result = tableModel.getCuota().subtract(persona.getPagado());
             saldos.add(result);
         }
+
+        int personaDeudor = -1;
+        int personaAcreedor = -1;
 
         String s = "";
         while(true) { // TODO
             BigDecimal maximoDeudor = BigDecimal.ZERO;
             BigDecimal maximoAcreedor = BigDecimal.ZERO;
-            int personaDeudor = -1;
-            int personaAcreedor = -1;
+
 
             for (int i = 0; i < saldos.size(); i++) {
                 BigDecimal saldo = saldos.get(i);
@@ -147,43 +104,14 @@ public class ModeloCuentas extends AbstractTableModel implements Modelo {
             }
 
             BigDecimal cantidad = maximoAcreedor.min(maximoDeudor.abs());
-            s = s.concat(personas.get(personaAcreedor) + " paga " + cantidad + " € a " + personas.get(personaDeudor) + "\n");
+            s = s.concat(tableModel.personas.get(personaAcreedor) + " paga " + cantidad + " € a " + tableModel.personas.get(personaDeudor) + "\n");
             saldos.set(personaAcreedor, saldos.get(personaAcreedor).subtract(cantidad));
             saldos.set(personaDeudor, saldos.get(personaDeudor).add(cantidad));
+
+
         }
 
         vista.ponerMensaje(s);
     }
-
-    private BigDecimal maximoDeudor(List<BigDecimal> list) {
-        BigDecimal maximo = BigDecimal.ZERO;
-        for (BigDecimal saldo : list) {
-            if (maximo.compareTo(saldo) < 0) {
-                maximo = saldo;
-            }
-        }
-        return maximo;
-    }
-
-    private BigDecimal maximoAcreedor(List<BigDecimal> list) {
-        BigDecimal maximo = BigDecimal.ZERO;
-        for (BigDecimal deuda : list) {
-            if (maximo.compareTo(deuda) > 0) {
-                maximo = deuda;
-            }
-        }
-        return maximo;
-    }
-
-    private boolean isTodosACero(HashMap<String, BigDecimal> values) {
-        boolean todosACero = true;
-        for (BigDecimal deuda : values.values()) {
-            if (deuda.doubleValue() != 0) {
-                return false;
-            }
-        }
-        return todosACero;
-    }
-
 
 }

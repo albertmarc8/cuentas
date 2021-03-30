@@ -5,7 +5,6 @@ import modelo.Modelo;
 
 import javax.swing.*;
 import java.awt.*;
-import java.math.BigDecimal;
 
 public class VistaCuentas implements Vista {
 
@@ -14,21 +13,21 @@ public class VistaCuentas implements Vista {
 
     private JFrame ventana;
 
-    private PestanaPago pestañaPago;
-    private PestanaResumen pestañaResumen;
+    private PestanaPago pestanyaPago;
+    private PestanaResumen pestanyaResumen;
 
     private JTextArea pagosARealizar;
 
     public void crearGUI() {
         ventana = new JFrame("cuentas");
 
-        pestañaPago = new PestanaPago(controlador);
-        pestañaResumen = new PestanaResumen(controlador, modelo);
+        pestanyaPago = new PestanaPago(controlador);
+        pestanyaResumen = new PestanaResumen(controlador, modelo);
         JPanel realizarPagos = crearPestanyaRealizarPagos();
 
         JTabbedPane tabs = new JTabbedPane();
-        tabs.add("Pago", pestañaPago);
-        tabs.add("Resumen", pestañaResumen);
+        tabs.add("Pago", pestanyaPago);
+        tabs.add("Resumen", pestanyaResumen);
         tabs.add("Pagos a realizar", realizarPagos);
 
         ventana.add(tabs);
@@ -54,29 +53,29 @@ public class VistaCuentas implements Vista {
 
     @Override
     public void datosCambiados() {
-        modelo.getTableModel().fireTableDataChanged();
-        pestañaResumen.setCuota(modelo.getCuota());
-        pestañaResumen.setTotal(modelo.getTotal());
+        modelo.getModelo().fireTableDataChanged();
+        pestanyaResumen.setCuota(modelo.getCuota());
+        pestanyaResumen.setTotal(modelo.getTotal());
     }
 
     @Override
     public void focoEnNombre() {
-        pestañaPago.focoEnNombre();
+        pestanyaPago.focoEnNombre();
     }
 
     @Override
     public String getCantidad() {
-        return pestañaPago.getCantidad();
+        return pestanyaPago.getCantidad();
     }
 
     @Override
     public String getConcepto() {
-        return pestañaPago.getConcepto();
+        return pestanyaPago.getConcepto();
     }
 
     @Override
     public String getNombre() {
-        return pestañaPago.getNombre();
+        return pestanyaPago.getNombre();
     }
 
     @Override
@@ -90,12 +89,12 @@ public class VistaCuentas implements Vista {
 
     @Override
     public void setCantidad(String s) {
-        pestañaPago.setCantidad(s);
+        pestanyaPago.setCantidad(s);
     }
 
     @Override
     public void setConcepto(String s) {
-        pestañaPago.setConcepto(s);
+        pestanyaPago.setConcepto(s);
     }
 
     public void setControlador(Controlador controlador) {

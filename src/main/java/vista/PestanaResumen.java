@@ -2,6 +2,7 @@ package vista;
 
 import controlador.Controlador;
 import modelo.Modelo;
+import modelo.ModeloCuentas;
 
 import javax.swing.*;
 import java.awt.*;
@@ -27,7 +28,7 @@ public class PestanaResumen extends JPanel {
         superior.add(cuota);
         add(superior, BorderLayout.PAGE_START);
 
-        JTable tabla = new JTable(mModelo.getTableModel());
+        JTable tabla = new JTable(mModelo.getModelo());
         JScrollPane scrollPane = new JScrollPane(tabla);
         add(scrollPane, BorderLayout.CENTER);
     }

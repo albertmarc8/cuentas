@@ -16,7 +16,7 @@ public class ModeloCuentas implements Modelo {
     private NuestroTableModel tableModel;
 
     public ModeloCuentas() {
-       tableModel = new NuestroTableModel();
+        tableModel = new NuestroTableModel();
     }
 
     @Override
@@ -41,8 +41,8 @@ public class ModeloCuentas implements Modelo {
             throw new IllegalArgumentException("El nombre no puede ser vacío");
         if (concepto.isEmpty())
             throw new IllegalArgumentException("El concepto no puede ser vacío");
-        if (cantidad.doubleValue() <= 0.0d)
-            throw new IllegalArgumentException("La cantidad tiene que ser mayor que cero");
+        if (cantidad.doubleValue() < 0.0d)
+            throw new IllegalArgumentException("La cantidad tiene que ser cero o mayor");
 
         Persona persona;
         int posicion = -1;
@@ -63,8 +63,6 @@ public class ModeloCuentas implements Modelo {
         vista.datosCambiados();
     }
 
-
-
     @Override
     public AbstractTableModel getModelo() {
         return tableModel;
@@ -78,14 +76,12 @@ public class ModeloCuentas implements Modelo {
             saldos.add(result);
         }
 
-        int personaDeudor = -1;
-        int personaAcreedor = -1;
-
         String s = "";
-        while(true) { // TODO
+        while (true) {
+            int personaDeudor = -1;
+            int personaAcreedor = -1;
             BigDecimal maximoDeudor = BigDecimal.ZERO;
             BigDecimal maximoAcreedor = BigDecimal.ZERO;
-
 
             for (int i = 0; i < saldos.size(); i++) {
                 BigDecimal saldo = saldos.get(i);
@@ -107,10 +103,7 @@ public class ModeloCuentas implements Modelo {
             s = s.concat(tableModel.personas.get(personaAcreedor) + " paga " + cantidad + " € a " + tableModel.personas.get(personaDeudor) + "\n");
             saldos.set(personaAcreedor, saldos.get(personaAcreedor).subtract(cantidad));
             saldos.set(personaDeudor, saldos.get(personaDeudor).add(cantidad));
-
-
         }
-
         vista.ponerMensaje(s);
     }
 
